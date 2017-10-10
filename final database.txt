@@ -1,0 +1,224 @@
+-- -----------------------------------------------------
+-- Schema mydb
+-- -----------------------------------------------------
+create schema if not exists `chaungo`  ;
+use `chaungo` ;
+
+-- -----------------------------------------------------
+-- Table `chaungo`.`Service`
+-- -----------------------------------------------------
+drop table if exists `Service`;
+create table `Service` (
+  `ID` int not null,
+  `customer_ID` int not null,
+  `questions` varchar(50) not null,
+  primary key (`ID`));
+insert into `Service` (`ID`,`customer_ID`,`questions`) values
+(881,11, 'What is the return policy?'),
+(882,12, 'How many days to exchange?'),
+(883,13, 'How long is the shipping?'),
+(884,14, 'Is it free shipping?'),
+(885,15, 'How many businnes days to refund?'),
+(888,16, 'What skin type for the product');
+select * from `Service`limit 100;
+
+-- -----------------------------------------------------
+-- Table `chaungo`.`Customers`
+-- -----------------------------------------------------
+drop table if exists `Customers`;
+create table `Customers` (
+  `ID` int not null,
+  `name` varchar(45) not null,
+  `address` varchar(45) not null,
+  `email` varchar(45) not null,
+  `product_Type` varchar(45) not null,
+  `Service_ID` int not null,
+  primary key (`ID`),
+  index `fk_Customers_Service1_idx` (`Service_ID` ASC),
+  constraint `fk_Customers_Service1`
+    foreign key (`Service_ID`)
+    references `chaungo`.`Service` (`ID`)
+    on delete no action
+    on update no action);
+insert into `Customers`(`ID`, `name`,`address`, `email`, `product_Type`, `Service_ID`) values
+(11, 'Chloe'   , 'Colgate Drive'   , 'chloe@sql.com'     , 'skin care'   ,881),
+(12, 'ChloEric', 'Eastmark Rd'     , 'chloeric@tamu.edu' , 'face make up',882),
+(13, 'Eric'    , 'University Drive', 'eric@gmail.com'    , 'hair product',883),
+(14, 'Ashley'  , 'Texas Ave'       , 'ashley@hotmail.com', 'lips product',884),
+(15, 'Bella'   , 'Upper Kirby Dr'  , 'bella@yahoo.com'   , 'skin care'   ,885),
+(16, 'Shu-hao' , 'Cypress Rd'      , 'haohao@yahoo.com'  , 'skin care'   ,888);
+select *from `Customers` limit 100;
+
+-- -----------------------------------------------------
+-- Table `chaungo`.`Payment`
+-- -----------------------------------------------------
+drop table if exists `Payment`;
+create table `Payment` (
+  `Card number` varchar(50) not null,
+  `shipping address` varchar(50) not null,
+ primary key (`Card number`));
+
+insert into `Payment` (`Card number`,`shipping address`) values
+(5552025522600259, 'Colgate Drive'),
+(5845521447852200, 'Eastmark Rd' ),
+(8524522154777752, 'University Drive'),
+(7820820000578896, 'Texas Ave'),
+(7820525999330047, 'Upper Kirby Dr' ),
+(8885224777882204, 'Cypress Rd' );
+select * from `Payment`limit 100;
+
+-- -----------------------------------------------------
+-- Table `chaungo`.`Cart`
+-- -----------------------------------------------------
+drop table if exists `Cart`;
+create table `Cart` (
+  `ID` int not null,
+  `product ID` int not null,
+  `Total Amount` varchar(20) not null,
+  `Customers_ID` int not null,
+  `Payment_Card number` varchar(50) not null,
+  primary key(`ID`),
+  index `fk_Cart_Customers1_idx` (`Customers_ID` ASC),
+  index `fk_Cart_Payment1_idx` (`Payment_Card number` ASC),
+   constraint `fk_Cart_Customers1`
+    foreign key (`Customers_ID`)
+    references `chaungo`.`Customers` (`ID`)
+    on delete no action
+    on update no action,
+   constraint `fk_Cart_Payment1`
+    foreign key (`Payment_Card number`)
+    REFERENCES `chaungo`.`Payment` (`Card number`)
+    ON DELETE NO ACTION
+    on update no action
+);
+
+insert into `Cart` (`ID`, `product ID`,`Total Amount`,`Customers_ID`,`Payment_Card number`) values
+(1, '5287', '58.69', 11,'5552025522600259'),
+(2, '5412', '59.99', 12,'8885224777882204'),
+(3, '5220', '63.48', 13,'7820820000578896'),
+(4, '8524', '52.25', 14,'7820525999330047'),
+(5, '8522', '52.55', 15,'5845521447852200'),
+(6, '8854', '89.33', 16,'8524522154777752');
+select * from `Cart`limit 100;
+
+-- -----------------------------------------------------
+-- Table `chaungo`.`Brands`
+-- -----------------------------------------------------
+drop table if exists `Brands`;
+create table `Brands` (
+  `ID` int not null,
+  `product_Name` varchar(50) not null,
+  `type` varchar(50) not null,
+  primary key (`ID`));
+
+insert into `Brands` (ID,`product_Name`,`type`) values
+(21,'sunday riley', 'high-end'),
+(22,'shiseido'    , 'high-end'),
+(23,'laneige'     , 'drugstore'),
+(24,'oui'         , 'high-end'),
+(25,'murad'       , 'drugstore'),
+(26,'aquabomb'    , 'high-end');
+select * from `Brands`limit 100;
+-- -----------------------------------------------------
+-- Table `chaungo`.`Product`
+-- -----------------------------------------------------
+drop table if exists `Product`;
+create table `Product` (
+  `ID` INT NOT NULL,
+  `type` varchar(50) not null,
+  `name` varchar(50) not null,
+  `Cart_ID` int not null,
+  `Brands_ID` int not null,
+  `Customers_ID` int not null,
+  primary key (`ID`, `Cart_ID`),
+  index `fk_Product_Cart_idx` (`Cart_ID` ASC),
+  index `fk_Product_Brands1_idx` (`Brands_ID` ASC),
+  index `fk_Product_Customers1_idx` (`Customers_ID` ASC),
+  constraint `fk_Product_Cart`
+    foreign key  (`Cart_ID`)
+    references `chaungo`.`Cart` (`ID`)
+     on delete no action
+    on update no action,
+  constraint `fk_Product_Brands1`
+    foreign key  (`Brands_ID`)
+    references `chaungo`.`Brands` (`ID`)
+     on delete no action
+    on update no action,
+  constraint `fk_Product_Customers1`
+    foreign key (`Customers_ID`)
+    references `chaungo`.`Customers` (`ID`)
+    on delete no action
+    on update no action
+	);
+insert into `Product`(`ID`,`name`,`type`,`Brands_ID`,`Cart_ID`,`Customers_ID`) values
+(5287, 'sunday riley night cream', 'skin care'   , 21,1,11),
+(5412, 'shiseido foundation'     , 'face make up', 22,2,12),
+(5220, 'laneige lip care'        , 'lips product', 23,3,13),
+(8524, 'oui hair shampp'         , 'hair product', 24,4,14),
+(8522, 'aquabomb moisture gel'   , 'skin care'   , 25,5,15),
+(8854, 'murad spot eraser'       , 'skin care'   , 26,6,16);
+select * from `Product`limit 100;
+
+-- -----------------------------------------------------
+-- Three general queries with at least two conditions
+-- -----------------------------------------------------
+select * from `Customers` 
+where `product_type`='skin care'
+or `address`= 'Texas Ave' ;
+-- -----------------------------------------------------
+-- Customer and Products join
+-- -----------------------------------------------------
+select * 
+from Customers
+inner join Product
+on Product.ID=Product.ID;
+
+-- -----------------------------------------------------
+-- Cart and Payment join
+-- -----------------------------------------------------
+select *
+from Cart
+inner join Product on Product.type=Product.type;
+
+-- -----------------------------------------------------
+-- Customer and Products union
+-- -----------------------------------------------------
+select type from Product
+union 
+select Customers_ID from Cart;
+
+-- -----------------------------------------------------
+-- Group by Products name
+-- -----------------------------------------------------
+select name, count(*) from Product
+group by name;
+
+-- -----------------------------------------------------
+-- Order by query
+-- -----------------------------------------------------
+select `product_type`
+from Customers
+where `name` = 'Ashley'
+order by product_Type;
+
+select Customers.ID, Customers.name, Product.ID, Product.name
+from Customers, Product
+order by Product.ID;
+-- -----------------------------------------------------
+-- DISTINCT query
+-- -----------------------------------------------------
+select distinct Service.ID from Service;
+
+-- -----------------------------------------------------
+-- AGGREGATE query
+-- -----------------------------------------------------
+select AVG(`Total Amount`)
+from Cart
+where `product ID` = 5412;
+
+select `product ID`, AVG(`Total Amount`)
+from Cart
+group by Customers_ID;
+
+
+
